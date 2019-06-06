@@ -42,3 +42,10 @@ void VideoWindow::initializeGLFWWindow(){
 	}else
 		Logger::log_correct("Initialized Window!");
 }
+
+GLuint VideoWindow::getVertexBuffer(){return this->vertexBuffer;}
+GLuint VideoWindow::getColorBuffer(){return this->colorBuffer;}
+GLuint VideoWindow::getIndexBuffer(){return this->indexBuffer;}
+Proportions VideoWindow::getProportions(){return this->proportions;}
+GLFWwindow * VideoWindow::getGLFWWindow(){return this->glWindow;}
+

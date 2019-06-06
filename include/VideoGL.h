@@ -1,15 +1,20 @@
 #ifndef VIDEOGL_HEADER
 #define VIDEOGL_HEADER
 
+#include "opencv2/opencv.hpp"
+#include "opencv/highgui.h"
+
 #include "RenderableFrame.h"
-#include "GLFW/glfw3.h"
+#include "VideoWindow.h"
+#include "Logger/Logger.h"
 
 class VideoGL{
 	private:
 		RenderableFrame * renderableFrames;
-		void InitializeVertices();
-		void InitializeColors();
-		void InitializeIndices();
+		VideoWindow videoWindow;
+		void initializeVertices();
+		void initializeColors();
+		void initializeIndices();
 	public:
 		VideoGL(const char * videoPath);
 		void show();

@@ -20,10 +20,11 @@ class VideoWindow{
 		void initializeGLFWWindow();
 	public:
 		VideoWindow(Proportions proportions);
-		GLuint * getVertexBuffer();
-		GLuint * getColorBuffer();
-		GLuint * getIndexBuffer();
+		GLuint getVertexBuffer();
+		GLuint getColorBuffer();
+		GLuint getIndexBuffer();
 		Proportions getProportions();
+		GLFWwindow * getGLFWWindow();
 };
 
 #endif
