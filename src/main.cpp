@@ -2,18 +2,22 @@
 #include "opencv/highgui.h"
 #include <iostream>
 #include "../include/Logger/Logger.h"
-#include "../include/Line.h"
+#include "../include/VideoGL.h"
+
+using namespace std;
+using namespace cv;
+
 
 int main(){
-	
-	Point a = Point(vec3(1, 2, 3), vec3(0.0f, 0.0f, 0.0f));
-	Point b = Point(vec3(2, 3, 7), vec3(1.0f, 1.0f, 1.0f));
 
-	Line line = Line(a, b);
+	VideoCapture cap("videoSamples/bunny.mp4");
+	if(!cap.isOpened()){
+		Logger::log_error("Video wont open!");
+	}
 
-	vec3 pos = line.interpolatePosition(5.0f); 
-	
-	printf("%lf -- %lf -- %lf\n", pos[0], pos[1], pos[2]);
+	Logger::log_debug("Entering Main function!");
+	VideoGL video("videoSamples/bowler.avi");
+	video.show();
 
 	return 0;
 }

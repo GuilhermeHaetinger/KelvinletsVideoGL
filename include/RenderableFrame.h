@@ -7,11 +7,11 @@ class RenderableFrame{
 	private:
 		GLfloat * vertexArray;
 		GLfloat * colorArray;
-		GLuint * indexArray;
-		int getNumberOfVertices(Proportions proportions);
-		int getNumberOfIndices(Proportions proportions);
+		void checkArrays();
 	public:
-		RenderableFrame(GLfloat * vertexArray, GLfloat * colorArray, GLuint * indexArray);
+		RenderableFrame();
+		void setVertexArray(GLfloat * vertexArray, int size);
+		void setColorArray(GLfloat * colorArray, int size);
 		void draw(VideoWindow videoWindow);
 };
 
