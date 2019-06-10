@@ -27,12 +27,11 @@ VideoGL::VideoGL(const char * videoPath) :
 	Logger::log_correct("Initialized VideoGL from VideoPath!");
 }
 
-VideoGL::VideoGL(RenderableFrame * renderableFrames, Proportions proportions) :
-	videoWindow(proportions)
-{
-	Logger::log_debug("Initializing VideoGL from RenderableFrame array constructor!");
-	memcpy(this->renderableFrames, renderableFrames, this->getLength() * sizeof(RenderableFrame));
-	Logger::log_correct("Initialized VideoGL from RenderableFrame array!");
+void VideoGL::resetFrames(Frame * frames){
+	Logger::log_debug("Resetting VideoGL from Frame array constructor!");
+	for(int index = 0; index < this->getLength(); index++)
+		this->renderableFrames[index] = RenderableFrame(frames[index]);
+	Logger::log_correct("Resetting VideoGL from Frame array!");
 }
 
 int VideoGL::getWidth(){ return this->videoWindow.getProportions().width;}
@@ -91,6 +90,13 @@ void VideoGL::initializeColors(cv::VideoCapture video){
 		this->renderableFrames[frame].setColorArray(frameColorArray, size * sizeof(GLfloat));
 	}
 	Logger::log_correct("Finished Initializing Colors!");
+}
+
+Proportions VideoGL::getProportions(){return this->videoWindow.getProportions();}
+void VideoGL::getFrames(Frame * dest){
+	for(int frame = 0; frame < this->getLength(); frame++){
+		dest[frame] = this->renderableFrames[frame].getFrame();
+	}
 }
 
 void VideoGL::show(){

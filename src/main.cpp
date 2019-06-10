@@ -3,6 +3,7 @@
 #include <iostream>
 #include "../include/Logger/Logger.h"
 #include "../include/VideoGL.h"
+#include "../include/VideoDeformer.h"
 
 using namespace std;
 using namespace cv;
@@ -16,7 +17,21 @@ int main(){
 	}
 
 	Logger::log_debug("Entering Main function!");
-	VideoGL video("videoSamples/bowler.avi");
+	VideoGL video("videoSamples/bunny.mp4");
+	
+//	video.show();
+		
+	Proportions prop = video.getProportions();
+	Frame * frames = (Frame *) malloc(prop.length * sizeof(Frame));
+
+	video.getFrames(frames);
+
+	Deformation deformation(vec3(10, 10, 50), vec3(10,50,20), 50.);
+	VideoDeformer * def = new VideoDeformer(deformation, frames, prop);
+
+	Frame * newFrames = def->deform(deformation);
+
+	video.resetFrames(newFrames);
 	video.show();
 
 	return 0;

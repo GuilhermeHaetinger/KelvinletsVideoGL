@@ -2,16 +2,19 @@
 #define RASTERIZABLE_FRAME_HEADER
 
 #include "VideoWindow.h"
+#include "Frame.h"
+#include "Logger/Logger.h"
 
 class RenderableFrame{
 	private:
-		GLfloat * vertexArray;
-		GLfloat * colorArray;
+		Frame frame;
 		void checkArrays();
 	public:
 		RenderableFrame();
+		RenderableFrame(Frame frame);
 		void setVertexArray(GLfloat * vertexArray, int size);
 		void setColorArray(GLfloat * colorArray, int size);
+		Frame getFrame();
 		void draw(VideoWindow videoWindow);
 };
 

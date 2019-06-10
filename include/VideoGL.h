@@ -22,7 +22,9 @@ class VideoGL{
 		void initializeColors(cv::VideoCapture video);
 	public:
 		VideoGL(const char * videoPath);
-		VideoGL(RenderableFrame * renderableFrames, Proportions  proportions);
+		void resetFrames(Frame * frames);	
+		void getFrames(Frame * dest);
+		Proportions getProportions();
 		void show();
 };
 

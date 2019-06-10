@@ -1,17 +1,16 @@
 #include "../include/RenderableFrame.h"
 
-RenderableFrame::RenderableFrame(){
-	this->vertexArray = NULL;
-	this->colorArray = NULL;
-}
+RenderableFrame::RenderableFrame() : frame(){}
+
+RenderableFrame::RenderableFrame(Frame frame) : frame(frame){}
 
 void RenderableFrame::checkArrays(){
 	Logger::log_debug("Checking Arrays!");
 
-	if(!this->vertexArray){
+	if(!this->frame.vertexArray){
 		Logger::log_fatal("Vertex Array not initialized!");
 		exit(1);
-	}else if(!this->colorArray){
+	}else if(!this->frame.colorArray){
 		Logger::log_fatal("Color Array not initialized!");
 		exit(1);
 	}
@@ -20,22 +19,24 @@ void RenderableFrame::checkArrays(){
 }
 
 void RenderableFrame::setVertexArray(GLfloat * vertexArray, int size){
-	if(this->vertexArray != NULL){
+	if(this->frame.vertexArray != NULL){
 		Logger::log_debug("Freeing previous Vertex Array");
-		free(this->vertexArray);
+		free(this->frame.vertexArray);
 	}else
-		this->vertexArray = (GLfloat *) malloc(size);
-	memcpy(this->vertexArray, vertexArray, size);	
+		this->frame.vertexArray = (GLfloat *) malloc(size);
+	memcpy(this->frame.vertexArray, vertexArray, size);	
 }
 
 void RenderableFrame::setColorArray(GLfloat * colorArray, int size){
-	if(this->colorArray != NULL){
+	if(this->frame.colorArray != NULL){
 		Logger::log_debug("Freeing previous Color Array");
-		free(this->colorArray);
+		free(this->frame.colorArray);
 	}else
-		this->colorArray = (GLfloat *) malloc(size);
-	memcpy(this->colorArray, colorArray, size);	
+		this->frame.colorArray = (GLfloat *) malloc(size);
+	memcpy(this->frame.colorArray, colorArray, size);	
 }
+
+Frame RenderableFrame::getFrame(){return this->frame;}
 
 void RenderableFrame::draw(VideoWindow videoWindow){
 	Logger::log_debug("Drawing frame!");
@@ -45,12 +46,12 @@ void RenderableFrame::draw(VideoWindow videoWindow){
 
 	int vertexArrayDataSize = videoWindow.getNumberOfVertices() * 2 * sizeof(GLfloat);
 	glBindBuffer(GL_ARRAY_BUFFER, videoWindow.getVertexBuffer());
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexArrayDataSize, this->vertexArray);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexArrayDataSize, this->frame.vertexArray);
 	glEnableVertexAttribArray(0);
 
 	int colorArrayDataSize = videoWindow.getNumberOfVertices() * 3 * sizeof(GLfloat);
 	glBindBuffer(GL_ARRAY_BUFFER, videoWindow.getColorBuffer());
-	glBufferSubData(GL_ARRAY_BUFFER, 0, colorArrayDataSize, this->colorArray);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, colorArrayDataSize, this->frame.colorArray);
 	glEnableVertexAttribArray(1);
 
 	glDrawElements(GL_TRIANGLE_STRIP, videoWindow.getNumberOfIndices(), GL_UNSIGNED_INT, nullptr);

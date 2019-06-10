@@ -4,7 +4,7 @@ void vec3ToFloatArray(GLfloat * array, int index, vec3 vector);
 ///
 
 GLfloat * InterpolationFrame::getInterpolatedArray(TypeOfArray type){
-	GLfloat * array = new GLfloat[this->numberOfLines * 3];
+	GLfloat * array = (GLfloat *)malloc(this->numberOfLines * 3 * sizeof(GLfloat));
 	for(int line = 0, counter = 0; line < this->numberOfLines; line++, counter+=3){
 		vec3 interpolatedPosition = this->getInterpolation(type, line);
 		vec3ToFloatArray(array, counter, interpolatedPosition);
@@ -22,13 +22,26 @@ InterpolationFrame::InterpolationFrame(int width, int height, int frameIndex){
 	this->frameIndex = frameIndex;
 	this->numberOfLines = width * height;
 	this->lines = (Line *)malloc(numberOfLines * sizeof(Line)); 
+	this->index = 0;
 }
 
-void InterpolationFrame::addLine(Line line, int index){lines[index] = line;}
+void InterpolationFrame::addLine(Line line){
+	this->lines[this->index] = line;
+	this->index++;
+}
 
 
 GLfloat * InterpolationFrame::getInterpolatedVertexArray(){
-	return this->getInterpolatedArray(this->TypeOfArray::POSITION);
+	
+	GLfloat * interp3D = this->getInterpolatedArray(this->TypeOfArray::POSITION);
+	GLfloat * newInterp = (GLfloat *) malloc(this->numberOfLines * 2 * sizeof(GLfloat));
+	
+	for(int counter = 0; counter < this->numberOfLines; counter++){
+		newInterp[counter*2] = interp3D[counter*3];
+		newInterp[counter*2 + 1] = interp3D[counter*3 + 1];
+	}
+	free(interp3D);
+	return newInterp;
 }
 
 GLfloat * InterpolationFrame::getInterpolatedColorArray(){
@@ -37,6 +50,9 @@ GLfloat * InterpolationFrame::getInterpolatedColorArray(){
 
 ///
 void vec3ToFloatArray(GLfloat * array, int index, vec3 vector){
+	
+//	printf("%lf\n", vector[0]);
+	
 	array[index] = vector[0];
 	array[index + 1] = vector[1];
 	array[index + 2] = vector[2];

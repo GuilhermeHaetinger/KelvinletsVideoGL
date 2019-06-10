@@ -5,17 +5,21 @@
 
 #include "KelvinletsTransformer.h"
 #include "InterpolationFrame.h"
-#include "RenderableFrame.h"
+#include "Proportions.h"
 #include "Deformation.h"
 #include "Logger/Logger.h"
 
 class VideoDeformer{
 	private:
+		Proportions proportions;
+		Frame * frames;
+		GLfloat ** depthValue;
 		KelvinletsTransformer kelvinletsTransformer;
-		InterpolationFrame * interpolationFrames;
+		Frame * generateInterpolatedFrames(Frame * frames);
+		Frame * interpolateFrames(InterpolationFrame * interpolationFrames);
 	public:
-		VideoDeformer(float elasticShearModulus, float poissonRatio, float radius, cv::VideoCapture video);
-		RenderableFrame * deform(Deformation deformation);
+		VideoDeformer(Deformation deformation, Frame * frames, Proportions proportions);
+		Frame * deform(Deformation deformation);
 };
 
 #endif

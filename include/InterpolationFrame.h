@@ -17,9 +17,10 @@ class InterpolationFrame{
 		int frameIndex;
 		int numberOfLines;
 		Line * lines;
+		int index;
 	public:
 		InterpolationFrame(int width, int height, int frameIndex);
-		void addLine(Line line, int index);
+		void addLine(Line line);
 		GLfloat * getInterpolatedVertexArray();
 		GLfloat * getInterpolatedColorArray();
 };
