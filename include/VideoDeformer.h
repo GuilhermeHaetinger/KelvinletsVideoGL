@@ -1,6 +1,8 @@
 #ifndef VIDEO_DEFORMER_HEADER
 #define VIDEO_DEFORMER_HEADER
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "opencv2/opencv.hpp"
 
 #include "KelvinletsTransformer.h"
@@ -17,9 +19,10 @@ class VideoDeformer{
 		KelvinletsTransformer kelvinletsTransformer;
 		Frame * generateInterpolatedFrames(Frame * frames);
 		Frame * interpolateFrames(InterpolationFrame * interpolationFrames);
-	public:
-		VideoDeformer(Deformation deformation, Frame * frames, Proportions proportions);
-		Frame * deform(Deformation deformation);
+    void drawPoints();
+  public:
+    VideoDeformer(Deformation deformation, Frame * frames, Proportions proportions);
+    Frame * deform(Deformation deformation);
 };
 
 #endif

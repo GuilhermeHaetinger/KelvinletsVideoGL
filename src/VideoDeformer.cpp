@@ -49,17 +49,17 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
 					glm::vec3 interpolatedPosition = line.interpolatePosition((GLfloat) z);
 					glm::vec3 interpolatedColor = line.interpolateColor((GLfloat) z);
 
-					frames[z].vertexArray[indexOn2Dimensions] = interpolatedPosition[0];	
-					frames[z].vertexArray[indexOn2Dimensions + 1] = interpolatedPosition[1];	
-	
+					frames[z].vertexArray[indexOn2Dimensions] = interpolatedPosition[0];
+					frames[z].vertexArray[indexOn2Dimensions + 1] = interpolatedPosition[1];
+
 //				  printf("%lf -- %lf\n", interpolatedPosition[0], interpolatedPosition[1]);
 
-					newColorMatrix[z][indexOn3Dimensions] = interpolatedColor[0];	
-					newColorMatrix[z][indexOn3Dimensions + 1] = interpolatedColor[1];	
-					newColorMatrix[z][indexOn3Dimensions + 2] = interpolatedColor[2];	
-					
+					newColorMatrix[z][indexOn3Dimensions] = interpolatedColor[0];
+					newColorMatrix[z][indexOn3Dimensions + 1] = interpolatedColor[1];
+					newColorMatrix[z][indexOn3Dimensions + 2] = interpolatedColor[2];
+
 //					printf("%lf -- %lf -- %lf\n", interpolatedColor[0], interpolatedColor[1], interpolatedPosition[2]);
-					
+
 					z++;
 				}else{
 					currentPoint++;
@@ -77,23 +77,165 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
 	return frames;
 }
 
+void VideoDeformer::drawPoints() {
+
+	Logger::log_debug("Initializing GLFW!");
+	if(!glfwInit()){
+		Logger::log_fatal("Couldn't initialize GLFW!");
+		exit(1);
+	}else
+		Logger::log_correct("Initialized GLFW");
+
+	Logger::log_debug("Initializing Window!");
+
+  GLFWwindow * glWindow = glfwCreateWindow(this->proportions.width, this->proportions.height,
+                                           "KELVINLETS VIDEO", NULL, NULL);
+	glfwSetWindowSizeLimits(glWindow, this->proportions.width, this->proportions.height, this->proportions.width, this->proportions.height);
+  if(!glWindow){
+		Logger::log_fatal("Couldn't initialize Window!");
+		exit(1);
+	}else{
+		glfwMakeContextCurrent(glWindow);
+		Logger::log_correct("Initialized Window!");
+	}
+
+	Logger::log_debug("Initializing GLEW!");
+	if(glewInit() != GLEW_OK){
+		Logger::log_fatal("Couldn't initialize GLEW!");
+		exit(1);
+	}else
+		Logger::log_correct("Initialized GLEW");
+
+  GLuint vtxBuf;
+  GLuint clrBuf;
+  GLuint idxBuf;
+
+	glGenBuffers(1, &vtxBuf);
+	glGenBuffers(1, &clrBuf);
+	glGenBuffers(1, &idxBuf);
+
+  int NumPoints = 1;
+
+  GLfloat vtx[NumPoints * 3] = {0.0f, 0.0f, 1.0f};
+  GLfloat clr[NumPoints * 3] = {1.0f, 0.0f, 0.5f};
+  GLuint idx[NumPoints] = {0};
+
+  glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vtx), vtx, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(clr), clr, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxBuf);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
+
+  /*
+  //VTX
+	Logger::log_debug("Initializing Vertex Buffer data!");
+	int vertexDataSize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
+	GLfloat * vertexArray = (GLfloat *)malloc(vertexDataSize);
+	glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexArray, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+  //CLR
+	Logger::log_debug("Initializing Color Buffer data!");
+	int colorDataSize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
+	GLfloat * colorArray = (GLfloat *) malloc(colorDataSize);
+	glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
+	glBufferData(GL_ARRAY_BUFFER, colorDataSize, colorArray, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+  //IDX
+  Logger::log_debug("Initializing index Buffer data!");
+  int sz = this->proportions.width * this->proportions.height * sizeof(GLuint);
+  GLuint * idx = (GLuint *) malloc(sz);
+
+  for (int y = 0; y < this->proportions.height; y++)
+    for (int x = 0; x < this->proportions.width; x++) {
+      int index = y * this->proportions.width + x;
+      idx[index] = index;
+    }
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxBuf);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz, idx, GL_STATIC_DRAW);
+  */
+  //SHADER
+	Logger::log_debug("Initializing Shaders!");
+	const char * vertexShaderPath = "shaders/vertexShader.glsl";
+	const char * fragmentShaderPath = "shaders/fragmentShader.glsl";
+
+	string vertexShader = ParseShader(vertexShaderPath);
+	string fragmentShader = ParseShader(fragmentShaderPath);
+
+	int shader = CreateShader(vertexShader, fragmentShader);
+	glUseProgram(shader);
+  Logger::log_correct("Initialized Shaders!");
+  /*
+  // EXEC
+  for (int z = 0; z < this->proportions.length; z++) {
+    getchar();
+    for (int y = 0; y < this->proportions.height; y++) {
+      for (int x = 0; x < this->proportions.width; x++) {
+        int index = this->proportions.width * y + x;
+        int index2D = index * 2;
+        int index3D = index * 3;
+        vertexArray[index3D] = this->frames[z].vertexArray[index2D];
+        vertexArray[index3D+1] = this->frames[z].vertexArray[index2D+1];
+        vertexArray[index3D+2] = this->depthValue[z][index];
+      }
+    }
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glPointSize(4.0f);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, vertexArray);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, colorDataSize, this->frames[z].colorArray);
+    glEnableVertexAttribArray(1);
+
+    int numOfVtx = this->proportions.height * this->proportions.width;
+    glDrawElements(GL_POINTS, numOfVtx, GL_UNSIGNED_INT, nullptr);
+    glfwSwapBuffers(glWindow);
+    glfwPollEvents();
+    }*/
+
+  glClear(GL_COLOR_BUFFER_BIT);
+  glPointSize(7.0f);
+
+  glDrawElements(GL_POINTS, NumPoints, GL_UNSIGNED_INT, nullptr);
+  glfwSwapBuffers(glWindow);
+  glfwPollEvents();
+  getchar();
+}
+
 Frame * VideoDeformer::deform(Deformation deformation){
+  /*Logger::log_debug("Deforming Frames!");
 	for(int y = 0; y < this->proportions.height; y++)
 		for(int x = 0; x < this->proportions.width; x++)
 			for(int z = 0; z < this->proportions.length; z++){
 				int index = y * this->proportions.width + x;
-				
+
 				glm::vec2 xyPosition = frames[z].getPosition(x, y, this->proportions.width);
 				glm::vec3 newPosition = this->kelvinletsTransformer.grab(glm::vec3(xyPosition, (GLfloat) z));
-			
-				//printf("%lf -- %lf -- %lf\n", newPosition[0], newPosition[1], newPosition[2]);
-				//getchar();
-					
+
 				int indexOn2Dimensions = (y * this->proportions.width + x) * 2;
 				this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0]; 
 				this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];				
 				this->depthValue[z][index] = newPosition[2];	
 			}
+  */Logger::log_correct("Deformed Frames!");
+  Logger::log_debug("Drawing Points!");
+  this->drawPoints();
 
 	Frame * interp = generateInterpolatedFrames(this->frames);
 	return interp;

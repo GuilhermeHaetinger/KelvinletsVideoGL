@@ -41,7 +41,7 @@ Frame RenderableFrame::getFrame(){return this->frame;}
 void RenderableFrame::draw(VideoWindow videoWindow){
 	Logger::log_debug("Drawing frame!");
 	this->checkArrays();
-	
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	int vertexArrayDataSize = videoWindow.getNumberOfVertices() * 2 * sizeof(GLfloat);

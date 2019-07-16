@@ -17,7 +17,7 @@ VideoGL::VideoGL(const char * videoPath) :
 	int length = video.get(CV_CAP_PROP_FRAME_COUNT);
 
 	Proportions proportions = Proportions(width, height, length);
-	this->videoWindow = VideoWindow(proportions);
+  this->videoWindow = VideoWindow(proportions);
 	this->renderableFrames = (RenderableFrame *) malloc(this->getLength() * sizeof(RenderableFrame));
 
 	this->initializeFrames();

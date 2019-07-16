@@ -8,12 +8,12 @@ VideoWindow::VideoWindow(Proportions proportions) :
 	}else{
 		Logger::log_debug("Creating VideoWindow!");
 		this->proportions = proportions;
-		this->initializeGLFW();
-		this->initializeGLFWWindow();
-		this->initializeGLEW();
-		this->initializeBuffers();
-		this->initializeBufferData();
-		this->initializeShaderProgram();
+    //		this->initializeGLFW();
+		//this->initializeGLFWWindow();
+		//this->initializeGLEW();
+		//this->initializeBuffers();
+		//this->initializeBufferData();
+		//this->initializeShaderProgram();
 		Logger::log_correct("Initialized VideoWindow!");
 	}
 }
