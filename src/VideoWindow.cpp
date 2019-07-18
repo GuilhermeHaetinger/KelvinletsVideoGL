@@ -8,7 +8,7 @@ VideoWindow::VideoWindow(Proportions proportions) :
 	}else{
 		Logger::log_debug("Creating VideoWindow!");
 		this->proportions = proportions;
-    //		this->initializeGLFW();
+    //this->initializeGLFW();
 		//this->initializeGLFWWindow();
 		//this->initializeGLEW();
 		//this->initializeBuffers();
@@ -68,7 +68,7 @@ GLuint * VideoWindow::initializeIndexArray(){
   int size = this->getNumberOfIndices();
   GLuint * templateArray = (GLuint *) malloc(size * sizeof(GLuint));
   int counter = 0;
-  
+
   for(int y = 0; y < this->proportions.height - 1; y++){
     templateArray[counter] = y * this->proportions.width;
     counter++;

@@ -26,7 +26,7 @@ int main(){
 
 	video.getFrames(frames);
 
-	Deformation deformation(vec3(10, 10, 50), vec3(10,50,20), 50.);
+	Deformation deformation(vec3(100, 100, 50), vec3(10,50,70), 50.);
 	VideoDeformer * def = new VideoDeformer(deformation, frames, prop);
 
 	Frame * newFrames = def->deform(deformation);

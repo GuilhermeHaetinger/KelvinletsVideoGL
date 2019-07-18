@@ -20,7 +20,7 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
 	Logger::log_debug("Setting new Color matrix!");
 	int colorArraySize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
 	GLfloat ** newColorMatrix = (GLfloat **) malloc(this->proportions.length * sizeof(GLfloat *));
-	for(int frame = 0; frame < this->proportions.length; frame++) 	
+	for(int frame = 0; frame < this->proportions.length; frame++)
 			newColorMatrix[frame] = (GLfloat *) malloc(colorArraySize);
 
 	Logger::log_debug("Creating Interpolated frames!");
@@ -29,16 +29,16 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
 			int currentPoint = 0;
 			for(int z = 0; z < this->proportions.length - 1;){
 				int index = y * this->proportions.width + x;
-				int indexOn2Dimensions = index * 2; 
-				int indexOn3Dimensions = index * 3; 
+				int indexOn2Dimensions = index * 2;
+				int indexOn3Dimensions = index * 3;
 				GLfloat distToFrame = this->depthValue[currentPoint][index] - z;
-				GLfloat distToPoint = abs(this->depthValue[currentPoint][index] - 
+				GLfloat distToPoint = abs(this->depthValue[currentPoint][index] -
 																	this->depthValue[currentPoint + 1][index]);
 				if(abs(distToFrame) <= distToPoint || distToFrame > 0){
 					glm::vec2 firstXYPosition = frames[currentPoint].getPosition(x, y, this->proportions.width);
 					glm::vec3 firstPosition = glm::vec3(firstXYPosition, depthValue[currentPoint][index]);
 					glm::vec3 firstColor = frames[currentPoint].getColor(x, y, this->proportions.width);
-					Point first = Point(firstPosition, firstColor);	
+					Point first = Point(firstPosition, firstColor);
 					glm::vec2 secondXYPosition = frames[currentPoint + 1].getPosition(x, y, this->proportions.width);
 					glm::vec3 secondPosition = glm::vec3(secondXYPosition, depthValue[currentPoint + 1][index]);
 					glm::vec3 secondColor = frames[currentPoint + 1].getColor(x, y, this->proportions.width);
@@ -114,26 +114,6 @@ void VideoDeformer::drawPoints() {
 	glGenBuffers(1, &clrBuf);
 	glGenBuffers(1, &idxBuf);
 
-  int NumPoints = 1;
-
-  GLfloat vtx[NumPoints * 3] = {0.0f, 0.0f, 1.0f};
-  GLfloat clr[NumPoints * 3] = {1.0f, 0.0f, 0.5f};
-  GLuint idx[NumPoints] = {0};
-
-  glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vtx), vtx, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(clr), clr, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxBuf);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
-
-  /*
   //VTX
 	Logger::log_debug("Initializing Vertex Buffer data!");
 	int vertexDataSize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
@@ -165,7 +145,7 @@ void VideoDeformer::drawPoints() {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxBuf);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz, idx, GL_STATIC_DRAW);
-  */
+
   //SHADER
 	Logger::log_debug("Initializing Shaders!");
 	const char * vertexShaderPath = "shaders/vertexShader.glsl";
@@ -177,23 +157,24 @@ void VideoDeformer::drawPoints() {
 	int shader = CreateShader(vertexShader, fragmentShader);
 	glUseProgram(shader);
   Logger::log_correct("Initialized Shaders!");
-  /*
+
   // EXEC
   for (int z = 0; z < this->proportions.length; z++) {
-    getchar();
     for (int y = 0; y < this->proportions.height; y++) {
       for (int x = 0; x < this->proportions.width; x++) {
         int index = this->proportions.width * y + x;
         int index2D = index * 2;
         int index3D = index * 3;
-        vertexArray[index3D] = this->frames[z].vertexArray[index2D];
-        vertexArray[index3D+1] = this->frames[z].vertexArray[index2D+1];
-        vertexArray[index3D+2] = this->depthValue[z][index];
+
+        glm::vec2 positionXY = this->frames[z].getPosition(x, y, this->proportions.width);
+
+        vertexArray[index3D] = positionXY.x;
+        vertexArray[index3D+1] = positionXY.y;
+        vertexArray[index3D+2] = - (this->depthValue[z][index] - z) / this->proportions.length;
       }
     }
-
     glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(4.0f);
+    glPointSize(0.05f);
 
     glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, vertexArray);
@@ -207,33 +188,32 @@ void VideoDeformer::drawPoints() {
     glDrawElements(GL_POINTS, numOfVtx, GL_UNSIGNED_INT, nullptr);
     glfwSwapBuffers(glWindow);
     glfwPollEvents();
-    }*/
-
-  glClear(GL_COLOR_BUFFER_BIT);
-  glPointSize(7.0f);
-
-  glDrawElements(GL_POINTS, NumPoints, GL_UNSIGNED_INT, nullptr);
-  glfwSwapBuffers(glWindow);
-  glfwPollEvents();
-  getchar();
+    getchar();
+  }
 }
 
 Frame * VideoDeformer::deform(Deformation deformation){
-  /*Logger::log_debug("Deforming Frames!");
+  Logger::log_debug("Deforming Frames!");
 	for(int y = 0; y < this->proportions.height; y++)
 		for(int x = 0; x < this->proportions.width; x++)
 			for(int z = 0; z < this->proportions.length; z++){
 				int index = y * this->proportions.width + x;
 
 				glm::vec2 xyPosition = frames[z].getPosition(x, y, this->proportions.width);
-				glm::vec3 newPosition = this->kelvinletsTransformer.grab(glm::vec3(xyPosition, (GLfloat) z));
+        glm::vec2 unorm = glm::vec2(((xyPosition.x + 1) / 2) * (this->proportions.width - 1),
+                                   -(((xyPosition.y + 1) / 2) * (this->proportions.height - 1) + 1 - this->proportions.height));
+
+        glm::vec3 newPosition = this->kelvinletsTransformer.grab(glm::vec3(unorm, (GLfloat) z));
+
+        newPosition[0] = 2 * (newPosition[0] / (this->proportions.width - 1)) - 1;
+        newPosition[1] =  2 * ((this->proportions.height - 1 - newPosition[1])/(this->proportions.height - 1)) - 1;
 
 				int indexOn2Dimensions = (y * this->proportions.width + x) * 2;
-				this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0]; 
-				this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];				
-				this->depthValue[z][index] = newPosition[2];	
+				this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0];
+				this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];
+				this->depthValue[z][index] = newPosition[2];
 			}
-  */Logger::log_correct("Deformed Frames!");
+  Logger::log_correct("Deformed Frames!");
   Logger::log_debug("Drawing Points!");
   this->drawPoints();
 
