@@ -77,6 +77,11 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
 	return frames;
 }
 
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+}
+
 void VideoDeformer::drawPoints() {
 
 	Logger::log_debug("Initializing GLFW!");
@@ -90,7 +95,7 @@ void VideoDeformer::drawPoints() {
 
   GLFWwindow * glWindow = glfwCreateWindow(this->proportions.width, this->proportions.height,
                                            "KELVINLETS VIDEO", NULL, NULL);
-	glfwSetWindowSizeLimits(glWindow, this->proportions.width, this->proportions.height, this->proportions.width, this->proportions.height);
+  glfwSetFramebufferSizeCallback(glWindow, FramebufferSizeCallback);
   if(!glWindow){
 		Logger::log_fatal("Couldn't initialize Window!");
 		exit(1);
