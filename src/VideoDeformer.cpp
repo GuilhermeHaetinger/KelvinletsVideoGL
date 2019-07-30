@@ -1,5 +1,7 @@
 #include "../include/VideoDeformer.h"
 
+int * frameCount;
+
 VideoDeformer::VideoDeformer(Deformation deformation, Frame * frames, Proportions proportions) :
 	kelvinletsTransformer(deformation, 1.0f, 0.4f), proportions(proportions)
 {
@@ -11,8 +13,11 @@ VideoDeformer::VideoDeformer(Deformation deformation, Frame * frames, Proportion
 	this->depthValue = (GLfloat **) malloc(this->proportions.length * sizeof(GLfloat *));
 	for(int i = 0; i < this->proportions.length; i++)
 		this->depthValue[i] = (GLfloat *) malloc(this->proportions.width * this->proportions.height * sizeof(GLfloat));
-		
-	Logger::log_correct("Created VideoDeformer!");
+
+  frameCount = (int *) malloc(this->proportions.length * sizeof(int));
+  for(int i = 0; i < this->proportions.length; i++)
+    frameCount[i] = 0;
+  Logger::log_correct("Created VideoDeformer!");
 }
 
 Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
@@ -121,32 +126,25 @@ void VideoDeformer::drawPoints() {
 
   //VTX
 	Logger::log_debug("Initializing Vertex Buffer data!");
-	int vertexDataSize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
+	int vertexDataSize = this->proportions.width * this->proportions.height * this->proportions.length * 3 * sizeof(GLfloat);
 	GLfloat * vertexArray = (GLfloat *)malloc(vertexDataSize);
-	glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
-	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexArray, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
 
   //CLR
 	Logger::log_debug("Initializing Color Buffer data!");
-	int colorDataSize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
+	int colorDataSize = this->proportions.width * this->proportions.height * this->proportions.length * 3 * sizeof(GLfloat);
 	GLfloat * colorArray = (GLfloat *) malloc(colorDataSize);
-	glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
-	glBufferData(GL_ARRAY_BUFFER, colorDataSize, colorArray, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
 
   //IDX
   Logger::log_debug("Initializing index Buffer data!");
-  int sz = this->proportions.width * this->proportions.height * sizeof(GLuint);
+  int sz = this->proportions.length * this->proportions.width * this->proportions.height * sizeof(GLuint);
   GLuint * idx = (GLuint *) malloc(sz);
 
-  for (int y = 0; y < this->proportions.height; y++)
-    for (int x = 0; x < this->proportions.width; x++) {
-      int index = y * this->proportions.width + x;
-      idx[index] = index;
-    }
+  for(int z = 0; z < this->proportions.length; z++)
+    for (int y = 0; y < this->proportions.height; y++)
+      for (int x = 0; x < this->proportions.width; x++) {
+        int index = z * this->proportions.height * this->proportions.width + y * this->proportions.width + x;
+        idx[index] = index;
+      }
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxBuf);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz, idx, GL_STATIC_DRAW);
@@ -164,33 +162,67 @@ void VideoDeformer::drawPoints() {
   Logger::log_correct("Initialized Shaders!");
 
   // EXEC
+
+	Logger::log_debug("Initializing Shifts!");
+  int frameIndexShift[this->proportions.length];
+  frameIndexShift[0] = 0;
+  for(int i = 1; i < this->proportions.length; i++) {
+    frameIndexShift[i] = frameIndexShift[i-1] + frameCount[i-1];
+  }
+  Logger::log_correct("Initialized Shifts!");
+
+	Logger::log_debug("Initializing Fillings!");
+  int frameFilling[this->proportions.length];
+  for(int i = 0; i < this->proportions.length; i++)
+    frameFilling[i] = 0;
+  Logger::log_correct("Initialized Fillings!");
+
+	Logger::log_debug("Creating Deformed Vertices!");
   for (int z = 0; z < this->proportions.length; z++) {
     for (int y = 0; y < this->proportions.height; y++) {
       for (int x = 0; x < this->proportions.width; x++) {
+        int fullIndex = z * this->proportions.height * this->proportions.width + this->proportions.width * y + x;
         int index = this->proportions.width * y + x;
         int index2D = index * 2;
         int index3D = index * 3;
 
-        glm::vec2 positionXY = this->frames[z].getPosition(x, y, this->proportions.width);
 
-        vertexArray[index3D] = positionXY.x;
-        vertexArray[index3D+1] = positionXY.y;
-        vertexArray[index3D+2] = - (this->depthValue[z][index] - z) / this->proportions.length;
+        glm::vec2 positionXY = this->frames[z].getPosition(x, y, this->proportions.width);
+        int pixelFrame = round(this->depthValue[z][index]);
+        if(pixelFrame >= 0 && pixelFrame < this->proportions.length) {
+          vertexArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3] = positionXY.x;
+          vertexArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3 + 1] = positionXY.y;
+          vertexArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3 + 2] = 0;
+
+          colorArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3] = this->frames[z].colorArray[index3D];
+          colorArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3 + 1] = this->frames[z].colorArray[index3D + 1];
+          colorArray[frameIndexShift[pixelFrame] * 3 + frameFilling[pixelFrame] * 3 + 2] = this->frames[z].colorArray[index3D + 2];
+
+          frameFilling[pixelFrame]++;
+        }
       }
     }
+  }
+  Logger::log_correct("Created Deformed Vertices!");
+
+	glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
+	glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexArray, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
+	glBufferData(GL_ARRAY_BUFFER, colorDataSize, colorArray, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+
+  while(true)
+  for(int z = 0; z < this->proportions.length; z++) {
     glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(0.05f);
+    glPointSize(0.0001f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vtxBuf);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexDataSize, vertexArray);
-    glEnableVertexAttribArray(0);
+    int frameSize = frameCount[z];
 
-    glBindBuffer(GL_ARRAY_BUFFER, clrBuf);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, colorDataSize, this->frames[z].colorArray);
-    glEnableVertexAttribArray(1);
-
-    int numOfVtx = this->proportions.height * this->proportions.width;
-    glDrawElements(GL_POINTS, numOfVtx, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_POINTS, frameSize, GL_UNSIGNED_INT, (void *) (frameIndexShift[z] * sizeof(GLuint)));
     glfwSwapBuffers(glWindow);
     glfwPollEvents();
     getchar();
@@ -217,7 +249,12 @@ Frame * VideoDeformer::deform(Deformation deformation){
 				this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0];
 				this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];
 				this->depthValue[z][index] = newPosition[2];
-			}
+
+        int framePos = round(newPosition[2]);
+        if(framePos >= 0 && framePos < this->proportions.length)
+          frameCount[framePos]++;
+
+      }
   Logger::log_correct("Deformed Frames!");
   Logger::log_debug("Drawing Points!");
   this->drawPoints();

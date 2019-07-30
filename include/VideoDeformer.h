@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <math.h>
 #include "opencv2/opencv.hpp"
 
 #include "KelvinletsTransformer.h"
@@ -15,7 +16,7 @@ class VideoDeformer{
 	private:
 		Proportions proportions;
 		Frame * frames;
-		GLfloat ** depthValue;
+    GLfloat ** depthValue;
 		KelvinletsTransformer kelvinletsTransformer;
 		Frame * generateInterpolatedFrames(Frame * frames);
 		Frame * interpolateFrames(InterpolationFrame * interpolationFrames);
