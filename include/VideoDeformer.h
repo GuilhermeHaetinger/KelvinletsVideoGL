@@ -14,6 +14,7 @@
 
 class VideoDeformer{
 	private:
+        void retardInPosition(int x, int y, int z, GLfloat * retardX, GLfloat * retardY, GLfloat * retardZ);
 		Proportions proportions;
 		Frame * frames;
     GLfloat ** depthValue;

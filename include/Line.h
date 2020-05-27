@@ -3,6 +3,8 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/vec3.hpp>
+#include <glm/glm.hpp>
+#include <iostream>
 
 #include "Point.h"
 #include "Logger/Logger.h"

@@ -22,13 +22,13 @@ vec3 KelvinletsTransformer::grab(vec3 position){
 	mat3 third = (float) ((a/2) * ((pow(this->deformation.getRadius(), 2)/pow(rEpslon, 3)))) * I;
 	mat3 kelvinState = first + second + third;
 	vec3 delta = this->c * this->deformation.getRadius() * kelvinState * this->deformation.getForce();
-  return position + delta;
+  return delta;
 	///TODO RETARDATION!!!
 }
 
 ///
 mat3 productWithTranspost(vec3 x){
 	return mat3(x[0] * x[0], x[1] * x[0], x[2] * x[0],
-							x[0] * x[1], x[1] * x[1], x[2] * x[1],
-							x[0] * x[2], x[1] * x[2], x[2] * x[2]);
+				x[0] * x[1], x[1] * x[1], x[2] * x[1],
+				x[0] * x[2], x[1] * x[2], x[2] * x[2]);
 }

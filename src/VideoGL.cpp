@@ -12,9 +12,9 @@ VideoGL::VideoGL(const char * videoPath) :
 		exit(1);
 	}
 
-	int width = video.get(CV_CAP_PROP_FRAME_WIDTH);
-	int height = video.get(CV_CAP_PROP_FRAME_HEIGHT);
-	int length = video.get(CV_CAP_PROP_FRAME_COUNT);
+	int width = video.get(cv::CAP_PROP_FRAME_WIDTH);
+	int height = video.get(cv::CAP_PROP_FRAME_HEIGHT);
+	int length = video.get(cv::CAP_PROP_FRAME_COUNT);
 
 	Proportions proportions = Proportions(width, height, length);
   this->videoWindow = VideoWindow(proportions);
@@ -102,6 +102,7 @@ void VideoGL::getFrames(Frame * dest){
 void VideoGL::show(){
 	for(int frame = 0; frame < this->getLength(); frame++){
 		renderableFrames[frame].draw(this->videoWindow);
+		std::cout << frame << "/" << this->getLength()-1 << std::endl;
 		getchar();
 	}
 }

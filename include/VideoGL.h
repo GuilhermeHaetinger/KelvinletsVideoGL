@@ -2,7 +2,7 @@
 #define VIDEOGL_HEADER
 
 #include "opencv2/opencv.hpp"
-#include "opencv/highgui.h"
+#include "opencv2/highgui.hpp"
 
 #include "RenderableFrame.h"
 #include "VideoWindow.h"

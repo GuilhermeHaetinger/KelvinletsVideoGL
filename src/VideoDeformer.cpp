@@ -21,65 +21,65 @@ VideoDeformer::VideoDeformer(Deformation deformation, Frame * frames, Proportion
 }
 
 Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
-	Logger::log_debug("Entering interpolated frames generation function!");
-	Logger::log_debug("Setting new Color matrix!");
-	int colorArraySize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
-	GLfloat ** newColorMatrix = (GLfloat **) malloc(this->proportions.length * sizeof(GLfloat *));
-	for(int frame = 0; frame < this->proportions.length; frame++)
-			newColorMatrix[frame] = (GLfloat *) malloc(colorArraySize);
+  Logger::log_debug("Entering interpolated frames generation function!");
+  Logger::log_debug("Setting new Color matrix!");
+  int colorArraySize = this->proportions.width * this->proportions.height * 3 * sizeof(GLfloat);
+  GLfloat ** newColorMatrix = (GLfloat **) malloc(this->proportions.length * sizeof(GLfloat *));
+  for(int frame = 0; frame < this->proportions.length; frame++)
+    newColorMatrix[frame] = (GLfloat *) malloc(colorArraySize);
 
-	Logger::log_debug("Creating Interpolated frames!");
-	for(int y = 0; y < this->proportions.height; y++)
-		for(int x = 0; x < this->proportions.width; x++){
-			int currentPoint = 0;
-			for(int z = 0; z < this->proportions.length - 1;){
-				int index = y * this->proportions.width + x;
-				int indexOn2Dimensions = index * 2;
-				int indexOn3Dimensions = index * 3;
-				GLfloat distToFrame = this->depthValue[currentPoint][index] - z;
-				GLfloat distToPoint = abs(this->depthValue[currentPoint][index] -
-																	this->depthValue[currentPoint + 1][index]);
-				if(abs(distToFrame) <= distToPoint || distToFrame > 0){
-					glm::vec2 firstXYPosition = frames[currentPoint].getPosition(x, y, this->proportions.width);
-					glm::vec3 firstPosition = glm::vec3(firstXYPosition, depthValue[currentPoint][index]);
-					glm::vec3 firstColor = frames[currentPoint].getColor(x, y, this->proportions.width);
-					Point first = Point(firstPosition, firstColor);
-					glm::vec2 secondXYPosition = frames[currentPoint + 1].getPosition(x, y, this->proportions.width);
-					glm::vec3 secondPosition = glm::vec3(secondXYPosition, depthValue[currentPoint + 1][index]);
-					glm::vec3 secondColor = frames[currentPoint + 1].getColor(x, y, this->proportions.width);
-					Point second = Point(secondPosition, secondColor);
+  Logger::log_debug("Creating Interpolated frames!");
+  for(int y = 0; y < this->proportions.height; y++)
+    for(int x = 0; x < this->proportions.width; x++){
+      int currentPoint = 0;
+      int index = y * this->proportions.width + x;
+      int indexOn2Dimensions = index * 2;
+      int indexOn3Dimensions = index * 3;
+      for(int z = 0; z < this->proportions.length - 1;){
+        GLfloat distToFrame = this->depthValue[currentPoint][index] - z;
+        GLfloat distToPoint = abs(this->depthValue[currentPoint][index] -
+                                  this->depthValue[currentPoint + 1][index]);
+        if(abs(distToFrame) <= distToPoint || distToFrame > 0){
+          glm::vec2 firstXYPosition = frames[currentPoint].getPosition(x, y, this->proportions.width);
+          glm::vec3 firstPosition = glm::vec3(firstXYPosition, depthValue[currentPoint][index]);
+          glm::vec3 firstColor = frames[currentPoint].getColor(x, y, this->proportions.width);
+          Point first = Point(firstPosition, firstColor);
+          glm::vec2 secondXYPosition = frames[currentPoint + 1].getPosition(x, y, this->proportions.width);
+          glm::vec3 secondPosition = glm::vec3(secondXYPosition, depthValue[currentPoint + 1][index]);
+          glm::vec3 secondColor = frames[currentPoint + 1].getColor(x, y, this->proportions.width);
+          Point second = Point(secondPosition, secondColor);
 
-					Line line = Line(first, second);
+          Line line = Line(first, second);
 
-					glm::vec3 interpolatedPosition = line.interpolatePosition((GLfloat) z);
-					glm::vec3 interpolatedColor = line.interpolateColor((GLfloat) z);
+          glm::vec3 interpolatedPosition = line.interpolatePosition((GLfloat) z);
+          glm::vec3 interpolatedColor = line.interpolateColor((GLfloat) z);
 
-					frames[z].vertexArray[indexOn2Dimensions] = interpolatedPosition[0];
-					frames[z].vertexArray[indexOn2Dimensions + 1] = interpolatedPosition[1];
+          frames[z].vertexArray[indexOn2Dimensions] = interpolatedPosition[0];
+          frames[z].vertexArray[indexOn2Dimensions + 1] = interpolatedPosition[1];
 
-//				  printf("%lf -- %lf\n", interpolatedPosition[0], interpolatedPosition[1]);
+          newColorMatrix[z][indexOn3Dimensions] = interpolatedColor[0];
+          newColorMatrix[z][indexOn3Dimensions + 1] = interpolatedColor[1];
+          newColorMatrix[z][indexOn3Dimensions + 2] = interpolatedColor[2];
 
-					newColorMatrix[z][indexOn3Dimensions] = interpolatedColor[0];
-					newColorMatrix[z][indexOn3Dimensions + 1] = interpolatedColor[1];
-					newColorMatrix[z][indexOn3Dimensions + 2] = interpolatedColor[2];
-
-//					printf("%lf -- %lf -- %lf\n", interpolatedColor[0], interpolatedColor[1], interpolatedPosition[2]);
-
-					z++;
-				}else{
-					currentPoint++;
-				}
-			}
-			//TODO TREAR LAST FRAME CASE
-		}
-	Logger::log_correct("Created Interpolated frames!");
-	for(int frame = 0; frame < this->proportions.length; frame++){
-		free(frames[frame].colorArray);
-		frames[frame].colorArray = (GLfloat *) malloc(colorArraySize);
-		memcpy(frames[frame].colorArray, newColorMatrix[frame], colorArraySize);
-		frames[frame].colorArray = newColorMatrix[frame];
-	}
-	return frames;
+          z++;
+        }else{
+          currentPoint++;
+        }
+      }
+      int z = this->proportions.length - 1;
+      glm::vec3 color = frames[z].getColor(x, y, this->proportions.width);
+      newColorMatrix[z][indexOn3Dimensions] = color[0];
+      newColorMatrix[z][indexOn3Dimensions + 1] = color[1];
+      newColorMatrix[z][indexOn3Dimensions + 2] = color[2];
+    }
+  Logger::log_correct("Created Interpolated frames!");
+  for(int frame = 0; frame < this->proportions.length; frame++){
+    free(frames[frame].colorArray);
+    frames[frame].colorArray = (GLfloat *) malloc(colorArraySize);
+    memcpy(frames[frame].colorArray, newColorMatrix[frame], colorArraySize);
+    frames[frame].colorArray = newColorMatrix[frame];
+  }
+  return frames;
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -229,26 +229,70 @@ void VideoDeformer::drawPoints() {
   }
 }
 
+
+GLfloat retardationFunction(float alpha)
+{
+  return (GLfloat)(1/(pow(2, 1/4))) * pow((float)cos(pi<float>() * alpha) + 1, (float)1/4);
+}
+
+void VideoDeformer::retardInPosition(int x, int y, int z, GLfloat * retardX, GLfloat * retardY, GLfloat * retardZ)
+{
+  int dx1 = x;
+  int dx2 = this->proportions.width - x - 1;
+  int dy1 = y;
+  int dy2 = this->proportions.height - y - 1;
+  int dz1 = z;
+  int dz2 = this->proportions.length - z - 1;
+
+  int dx = glm::min(dx1, dx2);
+  int dy = glm::min(dy1, dy2);
+  int dz = glm::min(dz1, dz2);
+
+  float propX = (float) (2 * (float)(this->proportions.width / 2.0f - dx) / (float)this->proportions.width);
+  float propY = (float) (2 * (float)(this->proportions.height / 2.0f - dy) / (float)this->proportions.height);
+  float propZ = (float) (2 * (float)(this->proportions.length / 2.0f - dz) / (float)this->proportions.length);
+
+  *retardX = retardationFunction(propX);
+  *retardY = retardationFunction(propY);
+  *retardZ = retardationFunction(propZ);
+}
+
 Frame * VideoDeformer::deform(Deformation deformation){
   Logger::log_debug("Deforming Frames!");
-	for(int y = 0; y < this->proportions.height; y++)
-		for(int x = 0; x < this->proportions.width; x++)
-			for(int z = 0; z < this->proportions.length; z++){
-				int index = y * this->proportions.width + x;
+  for(int y = 0; y < this->proportions.height; y++)
+    for(int x = 0; x < this->proportions.width; x++)
+      for(int z = 0; z < this->proportions.length; z++){
+        int index = y * this->proportions.width + x;
 
-				glm::vec2 xyPosition = frames[z].getPosition(x, y, this->proportions.width);
+        glm::vec2 xyPosition = frames[z].getPosition(x, y, this->proportions.width);
         glm::vec2 unorm = glm::vec2(((xyPosition.x + 1) / 2) * (this->proportions.width - 1),
                                    -(((xyPosition.y + 1) / 2) * (this->proportions.height - 1) + 1 - this->proportions.height));
 
-        glm::vec3 newPosition = this->kelvinletsTransformer.grab(glm::vec3(unorm, (GLfloat) z));
+        glm::vec3 position = glm::vec3(unorm, (GLfloat) z);
+        glm::vec3 newPosition = this->kelvinletsTransformer.grab(position);
+
+        GLfloat * retardX = (GLfloat*) malloc(sizeof(GLfloat));
+        GLfloat * retardY = (GLfloat*) malloc(sizeof(GLfloat));
+        GLfloat * retardZ = (GLfloat*) malloc(sizeof(GLfloat));
+        retardInPosition(x, y, z, retardX, retardY, retardZ);
+
+        newPosition[0] *= *retardX;
+        newPosition[1] *= *retardY;
+        newPosition[2] *= *retardZ;
+        newPosition += position;
 
         newPosition[0] = 2 * (newPosition[0] / (this->proportions.width - 1)) - 1;
         newPosition[1] =  2 * ((this->proportions.height - 1 - newPosition[1])/(this->proportions.height - 1)) - 1;
 
-				int indexOn2Dimensions = (y * this->proportions.width + x) * 2;
-				this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0];
-				this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];
-				this->depthValue[z][index] = newPosition[2];
+
+        int indexOn2Dimensions = (y * this->proportions.width + x) * 2;
+        this->frames[z].vertexArray[indexOn2Dimensions] = newPosition[0];
+        this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];
+        this->depthValue[z][index] = newPosition[2];
+
+        free(retardX);
+        free(retardY);
+        free(retardZ);
 
         int framePos = round(newPosition[2]);
         if(framePos >= 0 && framePos < this->proportions.length)
@@ -257,7 +301,7 @@ Frame * VideoDeformer::deform(Deformation deformation){
       }
   Logger::log_correct("Deformed Frames!");
   Logger::log_debug("Drawing Points!");
-  this->drawPoints();
+  // this->drawPoints();
 
 	Frame * interp = generateInterpolatedFrames(this->frames);
 	return interp;

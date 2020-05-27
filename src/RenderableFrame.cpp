@@ -15,7 +15,7 @@ void RenderableFrame::checkArrays(){
 		exit(1);
 	}
 
-	Logger::log_correct("Arrays are set!");
+	Logger::log_debug("Arrays are set!");
 }
 
 void RenderableFrame::setVertexArray(GLfloat * vertexArray, int size){
