@@ -19,7 +19,7 @@ int classifyEnvironment(){
 		return DEBUG;
 	if(str_environment.compare("CORRECT") == 0)
 		return CORRECT;
-	return UNDEFINED;
+	return NONE;
 }
 
 void Logger::log_fatal(std::string message){

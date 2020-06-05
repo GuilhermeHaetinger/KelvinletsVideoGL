@@ -12,6 +12,7 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+#define NONE -1
 #define FATAL 0
 #define ERROR 1
 #define WARNING 2

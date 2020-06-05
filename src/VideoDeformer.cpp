@@ -36,14 +36,17 @@ Frame * VideoDeformer::generateInterpolatedFrames(Frame * frames){
       int indexOn2Dimensions = index * 2;
       int indexOn3Dimensions = index * 3;
       for(int z = 0; z < this->proportions.length - 1;){
-        GLfloat distToFrame = this->depthValue[currentPoint][index] - z;
-        GLfloat distToPoint = abs(this->depthValue[currentPoint][index] -
-                                  this->depthValue[currentPoint + 1][index]);
-        if(abs(distToFrame) <= distToPoint || distToFrame > 0){
+
+        bool should_leap = this->depthValue[currentPoint + 1][index] - z >= 0;
+
+        if(this->depthValue[currentPoint][index] - z > 0){z++;}
+        else if(should_leap){
+
           glm::vec2 firstXYPosition = frames[currentPoint].getPosition(x, y, this->proportions.width);
           glm::vec3 firstPosition = glm::vec3(firstXYPosition, depthValue[currentPoint][index]);
           glm::vec3 firstColor = frames[currentPoint].getColor(x, y, this->proportions.width);
           Point first = Point(firstPosition, firstColor);
+
           glm::vec2 secondXYPosition = frames[currentPoint + 1].getPosition(x, y, this->proportions.width);
           glm::vec3 secondPosition = glm::vec3(secondXYPosition, depthValue[currentPoint + 1][index]);
           glm::vec3 secondColor = frames[currentPoint + 1].getColor(x, y, this->proportions.width);
@@ -225,10 +228,13 @@ void VideoDeformer::drawPoints() {
     glDrawElements(GL_POINTS, frameSize, GL_UNSIGNED_INT, (void *) (frameIndexShift[z] * sizeof(GLuint)));
     glfwSwapBuffers(glWindow);
     glfwPollEvents();
-    getchar();
+    char resp = getchar();
+    if(resp == 'q'){
+      glfwDestroyWindow(glWindow);
+      return;
+    }
   }
 }
-
 
 GLfloat retardationFunction(float alpha)
 {

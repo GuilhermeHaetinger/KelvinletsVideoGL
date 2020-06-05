@@ -99,10 +99,9 @@ void VideoGL::getFrames(Frame * dest){
 	}
 }
 
-void VideoGL::show(){
+void VideoGL::show(unsigned int fm) {
 	for(int frame = 0; frame < this->getLength(); frame++){
 		renderableFrames[frame].draw(this->videoWindow);
-		std::cout << frame << "/" << this->getLength()-1 << std::endl;
-		getchar();
+		usleep(fm);
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
+#include <unistd.h>
 
 #include "RenderableFrame.h"
 #include "VideoWindow.h"
@@ -25,7 +26,7 @@ class VideoGL{
 		void resetFrames(Frame * frames);	
 		void getFrames(Frame * dest);
 		Proportions getProportions();
-		void show();
+		void show(unsigned int fm);
 };
 
 #endif

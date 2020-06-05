@@ -21,10 +21,10 @@ class VideoDeformer{
 		KelvinletsTransformer kelvinletsTransformer;
 		Frame * generateInterpolatedFrames(Frame * frames);
 		Frame * interpolateFrames(InterpolationFrame * interpolationFrames);
-    void drawPoints();
   public:
     VideoDeformer(Deformation deformation, Frame * frames, Proportions proportions);
     Frame * deform(Deformation deformation);
+    void drawPoints();
 };
 
 #endif

@@ -23,7 +23,7 @@ int main(int argc, char * argv[]){
 	}
 
 	Logger::log_debug("Entering Main function!");
-	VideoGL video("videoSamples/man2.mp4");
+	VideoGL video(video_name);
 	
 	Proportions prop = video.getProportions();
 	Frame * frames = (Frame *) malloc(prop.length * sizeof(Frame));
@@ -56,8 +56,15 @@ int main(int argc, char * argv[]){
 
 	video.resetFrames(newFrames);
 
-	while(true)
-		video.show();
+	unsigned int fm = 50000;
+	while(true){
+		video.show(fm);
+		char com = getchar();
+		if(com == 'q')
+			break;
+	}
+
+	def->drawPoints();
 
 	return 0;
 }
