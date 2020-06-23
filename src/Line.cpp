@@ -11,7 +11,6 @@ Line::Line(Point pointA, Point pointB) :
 GLfloat Line::getInterpolationCoefficient(GLfloat z){
 	float zPositionRelativeToA = abs(z - this->pointA.getPosition()[2]);
 	float totalZDistance = abs(this->pointB.getPosition()[2] - this->pointA.getPosition()[2]);
-	// std::cout << "Z: " << z << ", A:" << this->pointA.getPosition()[2] << ", B: " << this->pointB.getPosition()[2] << std::endl;
 	return zPositionRelativeToA / totalZDistance;
 }
 
@@ -21,8 +20,6 @@ vec3 Line::interpolateInformation(vec3 infoA, vec3 infoB, GLfloat t){
 
 vec3 Line::interpolatePosition(GLfloat z){
 	GLfloat t = getInterpolationCoefficient(z);
-	// std::cout << t << std::endl;
-	// getchar();
 	return interpolateInformation(this->pointA.getPosition(), this->pointB.getPosition(), t);
 }
 

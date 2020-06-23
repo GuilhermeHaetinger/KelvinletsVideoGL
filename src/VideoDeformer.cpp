@@ -277,14 +277,14 @@ Frame * VideoDeformer::deform(Deformation deformation){
         glm::vec3 position = glm::vec3(unorm, (GLfloat) z);
         glm::vec3 newPosition = this->kelvinletsTransformer.grab(position);
 
-        GLfloat * retardX = (GLfloat*) malloc(sizeof(GLfloat));
-        GLfloat * retardY = (GLfloat*) malloc(sizeof(GLfloat));
-        GLfloat * retardZ = (GLfloat*) malloc(sizeof(GLfloat));
-        retardInPosition(x, y, z, retardX, retardY, retardZ);
+        // GLfloat * retardX = (GLfloat*) malloc(sizeof(GLfloat));
+        // GLfloat * retardY = (GLfloat*) malloc(sizeof(GLfloat));
+        // GLfloat * retardZ = (GLfloat*) malloc(sizeof(GLfloat));
+        // retardInPosition(x, y, z, retardX, retardY, retardZ);
 
-        newPosition[0] *= *retardX;
-        newPosition[1] *= *retardY;
-        newPosition[2] *= *retardZ;
+        // newPosition[0] *= *retardX;
+        // newPosition[1] *= *retardY;
+        // newPosition[2] *= *retardZ;
         newPosition += position;
 
         newPosition[0] = 2 * (newPosition[0] / (this->proportions.width - 1)) - 1;
@@ -296,9 +296,9 @@ Frame * VideoDeformer::deform(Deformation deformation){
         this->frames[z].vertexArray[indexOn2Dimensions + 1] = newPosition[1];
         this->depthValue[z][index] = newPosition[2];
 
-        free(retardX);
-        free(retardY);
-        free(retardZ);
+        // free(retardX);
+        // free(retardY);
+        // free(retardZ);
 
         int framePos = round(newPosition[2]);
         if(framePos >= 0 && framePos < this->proportions.length)

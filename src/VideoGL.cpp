@@ -102,6 +102,5 @@ void VideoGL::getFrames(Frame * dest){
 void VideoGL::show(unsigned int fm) {
 	for(int frame = 0; frame < this->getLength(); frame++){
 		renderableFrames[frame].draw(this->videoWindow);
-		usleep(fm);
 	}
 }
