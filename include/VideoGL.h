@@ -9,6 +9,8 @@
 #include "VideoWindow.h"
 #include "Logger/Logger.h"
 
+#include <FreeImage.h>
+
 class VideoGL{
 	private:
 		RenderableFrame * renderableFrames;

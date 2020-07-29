@@ -41,7 +41,7 @@ VIDEO_WINDOW_OBJECT=$(BIN)VideoWindow.o
 SHADER_COMPILER=$(SRC)ShaderCompiler.cpp
 SHADER_COMPILER_OBJECT=$(BIN)ShaderCompiler.o
 
-OPENGL_FLAGS=-lpthread -lX11 -std=c++11 -lglfw -lGLEW -lglut -lGL
+OPENGL_FLAGS=-lpthread -lX11 -std=c++11 -lglfw -lGLEW -lglut -lGL -lfreeimage
 OPENCV_FLAGS=`pkg-config opencv4 --cflags --libs`
 FLAGS=$(OPENGL_FLAGS) $(OPENCV_FLAGS)
 

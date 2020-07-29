@@ -17,7 +17,7 @@ VideoGL::VideoGL(const char * videoPath) :
 	int length = video.get(cv::CAP_PROP_FRAME_COUNT);
 
 	Proportions proportions = Proportions(width, height, length);
-  this->videoWindow = VideoWindow(proportions);
+	this->videoWindow = VideoWindow(proportions);
 	this->renderableFrames = (RenderableFrame *) malloc(this->getLength() * sizeof(RenderableFrame));
 
 	this->initializeFrames();
@@ -102,5 +102,18 @@ void VideoGL::getFrames(Frame * dest){
 void VideoGL::show(unsigned int fm) {
 	for(int frame = 0; frame < this->getLength(); frame++){
 		renderableFrames[frame].draw(this->videoWindow);
+		BYTE* pixels = new BYTE[3 * this->getWidth() * this->getHeight()];
+
+		glReadPixels(0, 0, this->getWidth(), this->getHeight(), GL_BGR, GL_UNSIGNED_BYTE, pixels);
+		FIBITMAP* image = FreeImage_ConvertFromRawBits(pixels, this->getWidth(), this->getHeight(), 3 * this->getWidth(), 24, 0x0000FF, 0xFF0000, 0x00FF00, false);
+
+
+		char * filename = "/home/dewey/Misc/warpedVideo%d.bmp";
+		char final_filename[1000];
+		sprintf(final_filename, filename, frame);
+		FreeImage_Save(FIF_BMP, image, final_filename, 0);
+		FreeImage_Unload(image);
+		delete [] pixels;
+
 	}
 }

@@ -57,14 +57,14 @@ int main(int argc, char * argv[]){
 	video.resetFrames(newFrames);
 
 	unsigned int fm = 50000;
-	while(true){
+	// while(true){
 		video.show(fm);
 		char com = getchar();
-		if(com == 'q')
-			break;
-	}
+		// if(com == 'q')
+			// break;
+	// }
 
-	def->drawPoints();
+	// def->drawPoints();
 
 	return 0;
 }
